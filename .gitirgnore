@@ -1,0 +1,35 @@
+# Compilados de C/C++
+*.o
+*.out
+*.exe
+*.obj
+*.dll
+
+# Archivos temporales de edición
+*.log
+*.tmp
+*.swp
+*.bak
+*.~*
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Entornos virtuales de Python
+venv/
+env/
+ENV/
+
+# Base de datos
+*.db
+*.sqlite3
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de pruebas o datos simulados
+*.csv
+*.json
