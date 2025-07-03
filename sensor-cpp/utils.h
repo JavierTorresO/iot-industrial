@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <ctime>
 #include <vector>
-
+#pragma pack(push, 1)
 struct PaqueteSensor {
     int16_t id;
     int64_t timestamp;     // epoch time (segundos desde 1970)
@@ -14,7 +14,7 @@ struct PaqueteSensor {
     float presion;
     float humedad;
 };
-
+#pragma pack(pop)
 std::vector<uint8_t> serializarPaquete(const PaqueteSensor& p);
 std::vector<uint8_t> cifrarXOR(const std::vector<uint8_t>& data, uint8_t clave);
 

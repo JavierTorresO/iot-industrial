@@ -1,4 +1,5 @@
 //Lógica principal: generar, cifrar y enviar
+#define _WIN32_WINNT 0x0601  // Habilita funciones modernas como inet_pton (Windows 7+)
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -12,7 +13,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 #define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 5000
+#define SERVER_PORT 9001
 #define CLAVE_XOR 0x5A
 
 PaqueteSensor generarLectura(int16_t id) {
