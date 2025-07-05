@@ -26,7 +26,15 @@ PaqueteSensor generarLectura(int16_t id) {
     return p;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    // Parámetros por defecto
+    int num_paquetes = 0;        // Cantidad de paquetes a enviar (0 = envia indefinidamente hasta que se haga crtl+c)
+    int intervalo_segundos = 5;   // Tiempo entre envíos en segundos
+
+    // Leer argumentos opcionales: ./sensor.exe <num_paquetes> <intervalo_segundos>
+    if (argc >= 2) num_paquetes = std::atoi(argv[1]);
+    if (argc >= 3) intervalo_segundos = std::atoi(argv[2]);
+
     // Inicializar Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
@@ -34,7 +42,7 @@ int main() {
         return 1;
     }
 
-    // Crear socket TCP
+    // Crear socket TCP y conectar (igual que antes)
     SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock == INVALID_SOCKET) {
         std::cerr << "Error al crear socket.\n";
@@ -42,13 +50,11 @@ int main() {
         return 1;
     }
 
-    // Configurar dirección del servidor
     sockaddr_in serv_addr{};
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(SERVER_PORT);
     inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr);
 
-    // Conectar al servidor
     if (connect(sock, (sockaddr*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR) {
         std::cerr << "Error al conectar con servidor.\n";
         closesocket(sock);
@@ -59,22 +65,24 @@ int main() {
     std::cout << "Conectado al servidor intermedio\n";
 
     srand(time(0));
-    for (int i = 0; i < 5; ++i) { //Si conecta correctamente, envía 5 paquetes con datos simulados, cada 2 segundos
+
+    int contador = 0;
+    while (num_paquetes == 0 || contador < num_paquetes) {
         PaqueteSensor p = generarLectura(1);
         auto binario = serializarPaquete(p);
         auto cifrado = cifrarXOR(binario, CLAVE_XOR);
 
-        // Enviar datos cifrados
         int bytesEnviados = send(sock, reinterpret_cast<const char*>(cifrado.data()), cifrado.size(), 0);
         if (bytesEnviados == SOCKET_ERROR) {
             std::cerr << "Error al enviar datos.\n";
             break;
         }
         std::cout << "Lectura enviada: T=" << p.temperatura << "°C, P=" << p.presion << " hPa, H=" << p.humedad << "%\n";
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        std::this_thread::sleep_for(std::chrono::seconds(intervalo_segundos));
+        contador++;
     }
 
-    // Cerrar socket y limpiar Winsock
     closesocket(sock);
     WSACleanup();
 
