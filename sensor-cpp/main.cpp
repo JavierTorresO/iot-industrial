@@ -1,4 +1,3 @@
-//Lógica principal: generar, cifrar y enviar
 #define _WIN32_WINNT 0x0601  // Habilita funciones modernas como inet_pton (Windows 7+)
 
 #include <winsock2.h>
@@ -27,9 +26,9 @@ PaqueteSensor generarLectura(int16_t id) {
 }
 
 int main(int argc, char* argv[]) {
-    // Parámetros por defecto
-    int num_paquetes = 0;        // Cantidad de paquetes a enviar (0 = envia indefinidamente hasta que se haga crtl+c)
-    int intervalo_segundos = 5;   // Tiempo entre envíos en segundos
+    // Parámetros por defecto: envío indefinido cada 5 segundos
+    int num_paquetes = 0;          // 0 = infinito
+    int intervalo_segundos = 5;    // Intervalo de 5 segundos
 
     // Leer argumentos opcionales: ./sensor.exe <num_paquetes> <intervalo_segundos>
     if (argc >= 2) num_paquetes = std::atoi(argv[1]);
@@ -42,7 +41,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Crear socket TCP y conectar (igual que antes)
+    // Crear socket TCP
     SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock == INVALID_SOCKET) {
         std::cerr << "Error al crear socket.\n";
@@ -50,11 +49,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Configurar dirección del servidor
     sockaddr_in serv_addr{};
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(SERVER_PORT);
     inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr);
 
+    // Conectar al servidor
     if (connect(sock, (sockaddr*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR) {
         std::cerr << "Error al conectar con servidor.\n";
         closesocket(sock);
